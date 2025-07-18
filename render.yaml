@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: plaid-pdf
+    env: python
+    buildCommand: ""
+    startCommand: "python app.py"
+    envVars:
+      - key: PLAID_CLIENT_ID
+        fromEnvVar: PLAID_CLIENT_ID
+      - key: PLAID_SECRET
+        fromEnvVar: PLAID_SECRET
