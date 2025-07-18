@@ -10,6 +10,10 @@ def index():
 
 @app.route('/plaid-pdf', methods=['GET'])
 def get_pdf():
+    import requests
+    from flask import request, Response, jsonify
+    import os
+
     token = request.args.get("asset_report_token")
     if not token:
         return jsonify({"error": "Missing asset_report_token"}), 400
@@ -24,7 +28,14 @@ def get_pdf():
         }
     )
 
-    return Response(response.content, content_type="application/pdf")
+    return Response(
+        response.content,
+        content_type="application/pdf",
+        headers={
+            "Content-Disposition": "attachment; filename=plaid_asset_report.pdf"
+        }
+    )
+
 
 
 if __name__ == "__main__":
