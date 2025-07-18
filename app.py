@@ -5,20 +5,17 @@ import os
 app = Flask(__name__)
 
 @app.route('/')
-def index():
+def home():
     return 'Plaid PDF Proxy is running'
 
 @app.route('/plaid-pdf', methods=['GET'])
 def get_pdf():
-    import requests
-    from flask import request, Response, jsonify
-    import os
-
     token = request.args.get("asset_report_token")
     if not token:
         return jsonify({"error": "Missing asset_report_token"}), 400
 
-    response = requests.post(
+    # Request the real PDF from Plaid
+    plaid_response = requests.post(
         "https://sandbox.plaid.com/asset_report/pdf/get",
         headers={"Content-Type": "application/json"},
         json={
@@ -28,15 +25,16 @@ def get_pdf():
         }
     )
 
+    # Ensure successful response
+    if plaid_response.status_code != 200:
+        return jsonify({"error": "Plaid PDF request failed", "details": plaid_response.text}), plaid_response.status_code
+
+    # Stream raw binary PDF back
     return Response(
-        response.content,
+        plaid_response.content,
+        status=200,
         content_type="application/pdf",
         headers={
-            "Content-Disposition": "attachment; filename=plaid_asset_report.pdf"
+            "Content-Disposition": "inline; filename=plaid_asset_report.pdf"
         }
     )
-
-
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
