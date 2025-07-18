@@ -8,10 +8,9 @@ app = Flask(__name__)
 def index():
     return 'Plaid PDF Proxy is running'
 
-@app.route('/plaid-pdf', methods=['POST'])
+@app.route('/plaid-pdf', methods=['GET'])
 def get_pdf():
-    data = request.get_json()
-    token = data.get("asset_report_token")
+    token = request.args.get("asset_report_token")
     if not token:
         return jsonify({"error": "Missing asset_report_token"}), 400
 
@@ -26,6 +25,7 @@ def get_pdf():
     )
 
     return Response(response.content, content_type="application/pdf")
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
